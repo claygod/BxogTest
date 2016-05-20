@@ -39,11 +39,11 @@ func TestError404(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/b/12345", nil)
 	res := httptest.NewRecorder()
 	muxx := bxog.New()
-	muxx.Add("/a/:par", func(rw http.ResponseWriter, req *http.Request, r *bxog.Router) { rw.WriteHeader(404) }).Method("GET")
+	muxx.Add("/a/:par", func(rw http.ResponseWriter, req *http.Request, r *bxog.Router) { rw.WriteHeader(777) }).Method("GET")
 	muxx.Test()
 	muxx.ServeHTTP(res, req)
 
-	if res.Code == 404 {
+	if res.Code == 777 {
 		t.Errorf("expecting error code 404, got %v", res.Code)
 	}
 }
