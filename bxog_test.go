@@ -19,7 +19,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/claygod/bxog"
+	"github.com/claygod/Bxog"
 )
 
 func TestRouting(t *testing.T) {
