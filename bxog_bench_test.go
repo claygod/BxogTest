@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/claygod/bxog"
+	"github.com/claygod/Bxog"
 	"github.com/daryl/zeus"
 	"github.com/go-zoo/bone"
 	"github.com/gorilla/mux"
