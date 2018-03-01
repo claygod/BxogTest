@@ -12,7 +12,7 @@ package bxogtest
 //   100%
 //   ████████████████████
 //
-// 2016 Eduard Sesigin. Contacts: <claygod@yandex.ru>
+// 2016-2018 Eduard Sesigin. Contacts: <claygod@yandex.ru>
 
 import (
 	"net/http"
@@ -30,33 +30,10 @@ import (
 
 const ADD_PATH_COUNT = 150 // 1 10 50 100 150 250 500 1000
 
-// Test bxog ns/op
-func BenchmarkBxogMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
-	response := httptest.NewRecorder()
-	muxx := bxog.New()
-	muxx.Add("/", Bench2)
-	muxx.Add("/a", Bench2)
-	muxx.Add("/aas", Bench2)
-	muxx.Add("/sd", Bench2)
-	muxx.Add("/sd7", Bench2)
-
-	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.Add("/produkt"+strconv.Itoa(i)+"/:num/are/:year/goo/:price", Bench2)
-	}
-
-	muxx.Add("/produkt900/:num/art/:year/goo/:price", Bench2)
-
-	muxx.Test()
-	for n := 0; n < b.N; n++ {
-		muxx.ServeHTTP(response, request)
-	}
-}
-
 /**/
 // Test httprouter ns/op
 func BenchmarkHttpRouterMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
 	response := httptest.NewRecorder()
 	muxx := httprouter.New()
 
@@ -66,11 +43,33 @@ func BenchmarkHttpRouterMux(b *testing.B) {
 	muxx.Handler("GET", "/sd", http.HandlerFunc(Bench))
 
 	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.Handler("GET", "/produkt"+strconv.Itoa(i)+"/:num/are/:year/goo/:price", http.HandlerFunc(Bench))
+		muxx.Handler("GET", "/produkt"+strconv.Itoa(i)+"/:num/are/:year", http.HandlerFunc(Bench))
 	}
 
-	muxx.Handler("GET", "/produkt900/:num/art/:year/goo/:price", http.HandlerFunc(Bench))
+	muxx.Handler("GET", "/produkt900/:num/art/:year", http.HandlerFunc(Bench))
 
+	for n := 0; n < b.N; n++ {
+		muxx.ServeHTTP(response, request)
+	}
+}
+
+// Test bxog ns/op
+func BenchmarkBxogMux(b *testing.B) {
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
+	response := httptest.NewRecorder()
+	muxx := bxog.New()
+	muxx.Add("/", Bench2)
+	muxx.Add("/a", Bench2)
+	muxx.Add("/aas", Bench2)
+	muxx.Add("/sd", Bench2)
+
+	for i := ADD_PATH_COUNT; i > 0; i-- {
+		muxx.Add("/produkt"+strconv.Itoa(i)+"/:num/are/:year", Bench2)
+	}
+
+	muxx.Add("/produkt900/:num/art/:year", Bench2)
+
+	muxx.Test()
 	for n := 0; n < b.N; n++ {
 		muxx.ServeHTTP(response, request)
 	}
@@ -79,7 +78,7 @@ func BenchmarkHttpRouterMux(b *testing.B) {
 // Test daryl/zeus ns/op
 
 func BenchmarkZeusMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
 	response := httptest.NewRecorder()
 	muxx := zeus.New()
 
@@ -89,9 +88,9 @@ func BenchmarkZeusMux(b *testing.B) {
 	muxx.GET("/sd/:id", Bench)
 
 	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.GET("/produkt"+strconv.Itoa(i)+"/:num/art/:year/goo/:price", Bench)
+		muxx.GET("/produkt"+strconv.Itoa(i)+"/:num/art/:year", Bench)
 	}
-	muxx.GET("/produkt900/:num/art/:year/goo/:price", Bench)
+	muxx.GET("/produkt900/:num/art/:year", Bench)
 
 	for n := 0; n < b.N; n++ {
 		muxx.ServeHTTP(response, request)
@@ -101,19 +100,19 @@ func BenchmarkZeusMux(b *testing.B) {
 // Test gorilla/mux ns/op
 
 func BenchmarkGorillaMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
 	response := httptest.NewRecorder()
 	muxx := mux.NewRouter()
 
-	muxx.Handle("/", http.HandlerFunc(Bench))
-	muxx.Handle("/a", http.HandlerFunc(Bench))
-	muxx.Handle("/aas", http.HandlerFunc(Bench))
-	muxx.Handle("/sd", http.HandlerFunc(Bench))
+	//muxx.Handle("/", http.HandlerFunc(Bench))
+	//muxx.Handle("/a", http.HandlerFunc(Bench))
+	//muxx.Handle("/aas", http.HandlerFunc(Bench))
+	//muxx.Handle("/sd", http.HandlerFunc(Bench))
 
 	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.Handle("/produkt"+strconv.Itoa(i)+"/{num}/art/{year}/goo/{price}", http.HandlerFunc(Bench))
+		muxx.Handle("/produkt"+strconv.Itoa(i)+"/{num}/art/{year}", http.HandlerFunc(Bench))
 	}
-	muxx.Handle("/produkt900/{num}/art/{year}/goo/{price}", http.HandlerFunc(Bench))
+	muxx.Handle("/produkt900/{num}/art/{year}", http.HandlerFunc(Bench))
 
 	for n := 0; n < b.N; n++ {
 		muxx.ServeHTTP(response, request)
@@ -122,19 +121,19 @@ func BenchmarkGorillaMux(b *testing.B) {
 
 // Test gorilla/pat ns/op
 func BenchmarkGorillaPatMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
 	response := httptest.NewRecorder()
 	muxx := pat.New()
 
-	muxx.Get("/", Bench)
-	muxx.Get("/a", Bench)
-	muxx.Get("/aas", Bench)
-	muxx.Get("/sd", Bench)
+	//muxx.Get("/", Bench)
+	//muxx.Get("/a", Bench)
+	//muxx.Get("/aas", Bench)
+	//muxx.Get("/sd", Bench)
 
 	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.Get("/produkt"+strconv.Itoa(i)+"/{num}/art/{year}/goo/{price}", http.HandlerFunc(Bench))
+		muxx.Get("/produkt"+strconv.Itoa(i)+"/{num}/art/{year}", http.HandlerFunc(Bench))
 	}
-	muxx.Get("/produkt900/{num}/art/{year}/goo/{price}", http.HandlerFunc(Bench))
+	muxx.Get("/produkt900/{num}/art/{year}", http.HandlerFunc(Bench))
 
 	for n := 0; n < b.N; n++ {
 		muxx.ServeHTTP(response, request)
@@ -143,19 +142,19 @@ func BenchmarkGorillaPatMux(b *testing.B) {
 
 // Test bone ns/op
 func BenchmarkBoneMux(b *testing.B) {
-	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016/goo/347889", nil)
+	request, _ := http.NewRequest("GET", "/produkt900/92f23r44df/art/2016", nil)
 	response := httptest.NewRecorder()
 	muxx := bone.New()
 
-	muxx.Get("/", http.HandlerFunc(Bench))
-	muxx.Get("/a", http.HandlerFunc(Bench))
-	muxx.Get("/aas", http.HandlerFunc(Bench))
-	muxx.Get("/sd", http.HandlerFunc(Bench))
+	//muxx.Get("/", http.HandlerFunc(Bench))
+	//muxx.Get("/a", http.HandlerFunc(Bench))
+	//muxx.Get("/aas", http.HandlerFunc(Bench))
+	//muxx.Get("/sd", http.HandlerFunc(Bench))
 
 	for i := ADD_PATH_COUNT; i > 0; i-- {
-		muxx.Get("/produkt"+strconv.Itoa(i)+"/:num/art/:year/goo/:price", http.HandlerFunc(Bench))
+		muxx.Get("/produkt"+strconv.Itoa(i)+"/:num/art/:year", http.HandlerFunc(Bench))
 	}
-	muxx.Get("/produkt900/:num/art/:year/goo/:price", http.HandlerFunc(Bench))
+	muxx.Get("/produkt900/:num/art/:year", http.HandlerFunc(Bench))
 
 	for n := 0; n < b.N; n++ {
 		muxx.ServeHTTP(response, request)
